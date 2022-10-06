@@ -38,7 +38,6 @@ public class Util {
         return instance;
     }
 
-
     public static Connection getConnection() {
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
@@ -52,7 +51,7 @@ public class Util {
     }
 
 
-    public static SessionFactory getSessionFactory() {
+    public SessionFactory getSessionFactory() {
         Configuration configuration = new Configuration();
         Properties properties = new Properties();
 
