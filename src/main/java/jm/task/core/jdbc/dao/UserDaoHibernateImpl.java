@@ -3,7 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
+import org.hibernate.SessionFactory;
 
 import java.util.List;
 
@@ -11,74 +11,87 @@ public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
 
     }
-
+    Util util = new Util();
+    SessionFactory factory = util.getSessionFactory();
     @Override
     public void createUsersTable() {
-        try {
-            Session session = Util.getInstance().getSessionFactory().openSession();
-            Transaction transaction = session.beginTransaction();
-            String create_table = "CREATE TABLE IF NOT EXISTS USER"
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("CREATE TABLE IF NOT EXISTS USER"
                     + "(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
                     + "name VARCHAR(45) NOT NULL,"
                     + "lastName VARCHAR(45) NOT NULL,"
-                    + "age INT NOT NULL)";
-            session.createSQLQuery(create_table).executeUpdate();
-            transaction.commit();
+                    + "age INT NOT NULL)").executeUpdate();
+            session.getTransaction().commit();
             System.out.println("Таблица создана!");
         } catch (Exception ignored) {
-            System.out.println("Таблица уже существует!");
+            System.out.println("Ошибка создания таблицы");
         }
     }
 
     @Override
     public void dropUsersTable() {
-        Session session = Util.getInstance().getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        String drop_table = "DROP TABLE IF EXISTS USER";
-        session.createSQLQuery(drop_table).executeUpdate();
-        transaction.commit();
-        System.out.println("Таблица удалена!");
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("DROP TABLE IF EXISTS USER").executeUpdate();
+            session.getTransaction().commit();
+            System.out.println("Таблица удалена!");
+        } catch (Exception ignored) {
+            System.out.println("Таблицы не существует");
+        }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Session session = Util.getInstance().getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        User user = new User(name, lastName, age);
-        session.save(user);
-        transaction.commit();
-        System.out.println("User с именем – " + name + " добавлен в базу данных.");
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            User user = new User(name, lastName, age);
+            session.save(user);
+            session.getTransaction().commit();
+            System.out.println("User с именем – " + name + " добавлен в базу данных.");
+        } catch (Exception ignored) {
+            System.out.println("User с именем – " + name + "уже существует!");
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = Util.getInstance().getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        User user = session.load(User.class, id);
-        if (user != null) {
-            session.delete(user);
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            User user = session.load(User.class, id);
+            if (user != null) {
+                session.delete(user);
+            }
+            session.getTransaction().commit();
+            System.out.println("User с ID = " + id + " удален.");
+        } catch (Exception ignored) {
+            System.out.println("User с ID = " + id + "уже существует!");
         }
-        transaction.commit();
-        System.out.println("User с ID = " + id + " удален.");
     }
 
     @Override
     public List<User> getAllUsers() {
-        Session session = Util.getInstance().getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        List listOfUsers = session.createQuery("From User").list();
-        transaction.commit();
-        session.close();
+        List listOfUsers = null;
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            listOfUsers = session.createQuery("From User").list();
+            session.getTransaction().commit();
+            session.close();
+        } catch (Exception ignored) {
+            ignored.printStackTrace();
+        }
         return listOfUsers;
     }
 
     @Override
     public void cleanUsersTable() {
-        Session session = Util.getInstance().getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        String delete_all_users = "TRUNCATE TABLE USER";
-        session.createSQLQuery(delete_all_users).executeUpdate();
-        transaction.commit();
-        System.out.println("Записи пользователей удалены в таблица User!");
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("TRUNCATE TABLE USER").executeUpdate();
+            session.getTransaction().commit();
+            System.out.println("Записи пользователей удалены в таблица User!");
+        } catch (Exception ignored) {
+            System.out.println("Ошибка удаления записей!");
+        }
     }
 }
