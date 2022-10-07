@@ -11,8 +11,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
 
     }
-    Util util = new Util();
-    SessionFactory factory = util.getSessionFactory();
+    private SessionFactory factory = new Util().getSessionFactory();
     @Override
     public void createUsersTable() {
         try (Session session = factory.openSession()) {
@@ -45,8 +44,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         try (Session session = factory.openSession()) {
             session.beginTransaction();
-            User user = new User(name, lastName, age);
-            session.save(user);
+            session.save(new User(name, lastName, age));
             session.getTransaction().commit();
             System.out.println("User с именем – " + name + " добавлен в базу данных.");
         } catch (Exception ignored) {
@@ -76,9 +74,8 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             listOfUsers = session.createQuery("From User").list();
             session.getTransaction().commit();
-            session.close();
         } catch (Exception ignored) {
-            ignored.printStackTrace();
+            System.out.println("Ошибка вывода списка пользователей");
         }
         return listOfUsers;
     }
