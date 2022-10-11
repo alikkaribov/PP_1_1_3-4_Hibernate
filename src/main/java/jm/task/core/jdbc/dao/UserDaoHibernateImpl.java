@@ -9,9 +9,8 @@ import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
-
     }
-    private SessionFactory factory = new Util().getSessionFactory();
+    private SessionFactory factory = new Util().getInstance().getSessionFactory();
     @Override
     public void createUsersTable() {
         try (Session session = factory.openSession()) {
@@ -23,8 +22,9 @@ public class UserDaoHibernateImpl implements UserDao {
                     + "age INT NOT NULL)").executeUpdate();
             session.getTransaction().commit();
             System.out.println("Таблица создана!");
-        } catch (Exception ignored) {
-            System.out.println("Ошибка создания таблицы");
+        } catch (RuntimeException e) {
+            System.out.println("Таблица НЕ создана!");
+            e.printStackTrace();
         }
     }
 
@@ -35,8 +35,9 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery("DROP TABLE IF EXISTS USER").executeUpdate();
             session.getTransaction().commit();
             System.out.println("Таблица удалена!");
-        } catch (Exception ignored) {
-            System.out.println("Таблицы не существует");
+        } catch (RuntimeException e) {
+            System.out.println("Таблица НЕ удалена!");
+            e.printStackTrace();
         }
     }
 
@@ -47,8 +48,9 @@ public class UserDaoHibernateImpl implements UserDao {
             session.save(new User(name, lastName, age));
             session.getTransaction().commit();
             System.out.println("User с именем – " + name + " добавлен в базу данных.");
-        } catch (Exception ignored) {
-            System.out.println("User с именем – " + name + "уже существует!");
+        } catch (RuntimeException e) {
+            System.out.println("User " + name + " " + lastName + " НЕ может быть добален в таблицу!");
+            e.printStackTrace();
         }
     }
 
@@ -62,8 +64,9 @@ public class UserDaoHibernateImpl implements UserDao {
             }
             session.getTransaction().commit();
             System.out.println("User с ID = " + id + " удален.");
-        } catch (Exception ignored) {
-            System.out.println("User с ID = " + id + "уже существует!");
+        } catch (RuntimeException e) {
+            System.out.println("User с ID = " + id + " НЕ может быть удален!");
+            e.printStackTrace();
         }
     }
 
@@ -74,7 +77,7 @@ public class UserDaoHibernateImpl implements UserDao {
             session.beginTransaction();
             listOfUsers = session.createQuery("From User").list();
             session.getTransaction().commit();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             System.out.println("Ошибка вывода списка пользователей");
         }
         return listOfUsers;
@@ -87,8 +90,9 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery("TRUNCATE TABLE USER").executeUpdate();
             session.getTransaction().commit();
             System.out.println("Записи пользователей удалены в таблица User!");
-        } catch (Exception ignored) {
-            System.out.println("Ошибка удаления записей!");
+        } catch (RuntimeException e) {
+            System.out.println("Таблица не может быть очищена!");
+            e.printStackTrace();
         }
     }
 }

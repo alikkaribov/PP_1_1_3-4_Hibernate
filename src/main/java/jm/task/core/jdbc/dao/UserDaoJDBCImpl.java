@@ -23,7 +23,8 @@ public class UserDaoJDBCImpl implements UserDao {
                     + "age INT NOT NULL)");
             System.out.println("Таблица создана!");
         } catch (SQLException e) {
-            System.out.println("Ошибка создания таблицы");
+            e.printStackTrace();
+            System.out.println("Таблица НЕ создана!");
         }
     }
 
@@ -32,7 +33,8 @@ public class UserDaoJDBCImpl implements UserDao {
             statement.executeUpdate("DROP TABLE IF EXISTS USER");
             System.out.println("Таблица удалена!");
         } catch (SQLException e) {
-            System.out.println("Ошибка удаления таблицы");
+            e.printStackTrace();
+            System.out.println("Таблица НЕ удалена!");
         }
     }
 
@@ -48,7 +50,8 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.executeUpdate();
             System.out.println("User с именем - " + name + " добавлен в базу данных");
         } catch (SQLException e) {
-            System.out.println("Ошибка добавления User с именем -" + name);
+            e.printStackTrace();
+            System.out.println("User " + name + " " + lastName + " не может быть добален в таблицу!");
         }
     }
 
@@ -61,7 +64,8 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Ошибка удаления User с ID =" + id);
+            e.printStackTrace();
+            System.out.println("User с ID = " + id + " не может быть удален!");
         }
     }
 
@@ -80,7 +84,8 @@ public class UserDaoJDBCImpl implements UserDao {
                 listOfUsers.add(user);
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка вывода списка пользователей");
+            e.printStackTrace();
+            System.out.println("Ошибка чтения из таблицы!");
         }
         return listOfUsers;
     }
@@ -90,7 +95,8 @@ public class UserDaoJDBCImpl implements UserDao {
             statement.executeUpdate("TRUNCATE TABLE USER");
             System.out.println("Записи пользователей удалены в таблица User!");
         } catch (SQLException e) {
-            System.out.println("Ошибка удаления пользователя в таблица User!");
+            e.printStackTrace();
+            System.out.println("Таблица не может быть очищена!");
         }
     }
 }
